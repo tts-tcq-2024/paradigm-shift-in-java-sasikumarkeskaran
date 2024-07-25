@@ -2,27 +2,52 @@ package vitals;
 
 public class Main {
 
-    static boolean isBatteryManagementSystemMeasuresWithinRange(float value, float min, float max, String message, boolean warningEnabled, String warningMessage) {
+    static boolean isWithinRange(float value, float min, float max, String message) {
         if (value < min || value > max) {
             System.out.println(message);
             return false;
         }
-        if (warningEnabled) {
-            float warningLowerLimit = min + 0.05f * (max - min);
-            float warningUpperLimit = max - 0.05f * (max - min);
-            if (value < warningLowerLimit) {
-                System.out.println("Warning: " + warningMessage + " approaching discharge");
-            } else if (value > warningUpperLimit) {
-                System.out.println("Warning: " + warningMessage + " approaching charge-peak");
-            }
+        return true;
+    }
+
+    static void checkWarning(float value, float min, float max, String warningMessage) {
+        float warningLowerLimit = min + 0.05f * (max - min);
+        float warningUpperLimit = max - 0.05f * (max - min);
+        if (value < warningLowerLimit) {
+            System.out.println("Warning: " + warningMessage + " approaching discharge");
+        } else if (value > warningUpperLimit) {
+            System.out.println("Warning: " + warningMessage + " approaching charge-peak");
         }
+    }
+
+    static boolean checkTemperature(float temperature) {
+        if (!isWithinRange(temperature, 0, 45, "Temperature out of range!")) {
+            return false;
+        }
+        checkWarning(temperature, 0, 45, "Temperature");
+        return true;
+    }
+
+    static boolean checkSoc(float soc) {
+        if (!isWithinRange(soc, 20, 80, "State of Charge out of range!")) {
+            return false;
+        }
+        checkWarning(soc, 20, 80, "State of Charge");
+        return true;
+    }
+
+    static boolean checkChargeRate(float chargeRate) {
+        if (!isWithinRange(chargeRate, 0, 0.8f, "Charge Rate out of range!")) {
+            return false;
+        }
+        checkWarning(chargeRate, 0, 0.8f, "Charge Rate");
         return true;
     }
 
     static boolean batteryIsOk(float temperature, float soc, float chargeRate) {
-        return isBatteryManagementSystemMeasuresWithinRange(temperature, 0, 45, "Temperature out of range!", true, "Temperature") &&
-               isBatteryManagementSystemMeasuresWithinRange(soc, 20, 80, "State of Charge out of range!", true, "State of Charge") &&
-               isBatteryManagementSystemMeasuresWithinRange(chargeRate, 0, 0.8f, "Charge Rate out of range!", true, "Charge Rate");
+        return checkTemperature(temperature) &&
+               checkSoc(soc) &&
+               checkChargeRate(chargeRate);
     }
 
     public static void main(String[] args) {
